@@ -38,13 +38,15 @@
 
   html, body {
       font-family: 'Montserrat Alternates', sans-serif;
-      background: rgba(154,57,163,1);
+      background: rgb(2,0,36);
+      background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(7,6,94,1) 27%, rgba(9,9,121,1) 49%, rgba(0,212,255,1) 94%);
       color: black;
       width: 100%;
       max-width: 100%;
       height: 100%;
       padding: 0;
       margin: 0;
+      
     }
     *, *:before, *:after {
       -webkit-tap-highlight-color: transparent;
@@ -72,13 +74,8 @@
       padding: 0 26px;
       width: 100%;
       height: 100%;
-      background: rgba(154,57,163,1);
-      background: -moz-linear-gradient(-45deg, rgba(154,57,163,1) 0%, rgba(65,103,168,1) 100%);
-      background: -webkit-gradient(left top, right bottom, color-stop(0%, rgba(154,57,163,1)), color-stop(100%, rgba(65,103,168,1)));
-      background: -webkit-linear-gradient(-45deg, rgba(154,57,163,1) 0%, rgba(65,103,168,1) 100%);
-      background: -o-linear-gradient(-45deg, rgba(154,57,163,1) 0%, rgba(65,103,168,1) 100%);
-      background: -ms-linear-gradient(-45deg, rgba(154,57,163,1) 0%, rgba(65,103,168,1) 100%);
-      background: linear-gradient(135deg, rgba(154,57,163,1) 0%, rgba(65,103,168,1) 100%);
+      background: rgb(2,0,36);
+      background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(7,6,94,1) 27%, rgba(9,9,121,1) 49%, rgba(0,212,255,1) 94%);
       filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#9a39a3', endColorstr='#4167a8', GradientType=1 );
     }
     h1 {
@@ -99,8 +96,9 @@
     }
     .container {
       position: relative;
-      margin: calc(75px + 2vh + 2vw) auto 0 auto;
-      padding: 0;
+      margin: 0 auto 0 auto;
+      padding: calc(75px + 2vh + 2vw) 0 0 0;
+      height: 100%;
       width: 100%;
       max-width: 75%;
     }
@@ -235,7 +233,7 @@
       transform: translateY(-300px); /* Ajusta la distancia hacia arriba según sea necesario */
   }
 
-  #next-page-btn {
+  #next-page-btn, #back-page-btn {
       display: none; /* Oculta el botón inicialmente */
       margin: 20px auto;
       padding: 12px 20px;
@@ -250,8 +248,9 @@
       margin: 20px auto 10px; /* Centra el botón y agrega margen hacia abajo */
   }
 
-  #next-page-btn:hover {
+  #next-page-btn:hover, #back-page-btn:hover {
       background-color: #45a049; /* Cambia el color de fondo al pasar el mouse sobre el botón */
+      transform: scale(1.2);
   }
 
 
@@ -263,6 +262,7 @@
   #pagination-info {
       font-weight: bold;
       font-size: 16px;
+      color: white;
       margin-top: 10px; /* Agrega espacio entre el botón y el texto de paginación */
   }
 
@@ -275,17 +275,12 @@
       margin-top: 200px; /* Ajusta el margen superior según sea necesario */
   }
 
-  #next-page-btn {
-      width: 200px; /* Ajusta el ancho del botón según sea necesario */
+  #next-page-btn, #back-page-btn {
+      width: 125px; /* Ajusta el ancho del botón según sea necesario */
       height: 40px; /* Ajusta la altura del botón según sea necesario */
       margin: 20px auto; /* Centra el botón y agrega un margen superior */
   }
 
-
-  .container{
-      width: 100%;
-      height: 100%;
-  }
 
   .search-box{
       top: 30%;
