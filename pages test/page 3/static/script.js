@@ -93,14 +93,17 @@ $(document).ready(function () {
 
         // Copia del arreglo
         const productsCopy = products.slice();
-
-        productsCopy.forEach(function (product) {
-            product.price = parsePrice(product.price);
+/*         productsCopy.forEach(function (product) {
+            product.parsedPrice = parsePrice(product.price);
+            if (product.price == 0){
+                product.price = 0;
+            }
+        }); */
+        return productsCopy.sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
+/*         productsCopy.forEach(function (product) {
+            delete product.parsedPrice;
         });
-
-        const sortedProducts = productsCopy.sort((a, b) => a.price - b.price);
-        console.log(sortedProducts)
-        return sortedProducts;
+ */
     }
     
     function parsePrice(priceString) {
@@ -109,7 +112,7 @@ $(document).ready(function () {
         }
     
         var cleanedPrice = priceString.replace(/[^\d.,]/g, '');
-        cleanedPrice = cleanedPrice.replace('$', '').replace('.', '').replace(',', '.');
+        cleanedPrice = cleanedPrice.replace('$', '').replace(/\./g, '').replace(',', '.');
     
         const parsedPrice = parseFloat(cleanedPrice);
     
@@ -165,7 +168,7 @@ $(document).ready(function () {
             }
         } else {
             unavailableTxt.show();
-            unavailableTxt.text('No hay productos disponibles.');
+            unavailableTxt.text('No hay p   ductos disponibles.');
             paginationContainer.hide();
         }
     }
