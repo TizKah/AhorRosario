@@ -43,7 +43,7 @@ $(document).ready(function () {
                     // Mostrar los resultados después de cargar la imagen
                     setTimeout(function () {
                         displayPage(currentPage, filteredProducts);
-                    }, 500);
+                    }, 0);
                 });
 
                 // Mostrar solo el cuadro de búsqueda al inicio
@@ -144,11 +144,47 @@ $(document).ready(function () {
                     if (product.brand) {
                         resultItem.append('<p>Brand: ' + product.brand + '</p>');
                     }
+                // Agregar botón de agregar al carrito y elementos de cantidad
+                var quantityContainer = $('<div class="quantity-container"></div>');
+                var decreaseButton = $('<button class="quantity-btn decrease">-</button>');
+                var increaseButton = $('<button class="quantity-btn increase">+</button>');
+                var quantityInput = $('<input type="text" class="quantity-input" value="1" readonly>');
 
-                    resultsContainer.append(resultItem);
+                // Manejar el clic en el botón de agregar al carrito
+/*                 increaseButton.on('click', function () {
+                    // Aquí puedes agregar la lógica para agregar el producto al carrito
+                    // Puedes utilizar la información del producto actual (product) para hacerlo
+                }); */
+
+                // Manejar el clic en los botones de cantidad
+                decreaseButton.on('click', function () {
+                    var currentQuantity = parseInt(quantityInput.val());
+                    if (currentQuantity > 1) {
+                        quantityInput.val(currentQuantity - 1);
+                    }
+                });
+
+                increaseButton.on('click', function () {
+                    var currentQuantity = parseInt(quantityInput.val());
+                    quantityInput.val(currentQuantity + 1);
+                });
+
+                // Agregar los elementos al contenedor de cantidad
+                quantityContainer.append(decreaseButton);
+                quantityContainer.append(quantityInput);
+                quantityContainer.append(increaseButton);
+
+                // Agregar el botón y el contenedor de cantidad a la card
+                resultItem.append(quantityContainer);
+
+                // Agregar la card al contenedor de resultados
+                resultsContainer.append(resultItem);
+
                 });
 
                 imgElement.attr('src', product.image);
+
+    
             });
 
             unavailableTxt.text('');
@@ -168,7 +204,7 @@ $(document).ready(function () {
             }
         } else {
             unavailableTxt.show();
-            unavailableTxt.text('No hay p   ductos disponibles.');
+            unavailableTxt.text('No hay productos disponibles.');
             paginationContainer.hide();
         }
     }
@@ -204,4 +240,6 @@ $(document).ready(function () {
         }
     });
     
+    
 });
+

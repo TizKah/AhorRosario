@@ -287,6 +287,34 @@
   .search-box{
       top: 30%;
   }
-
-
   
+/* Estilo para los elementos de cantidad */
+.quantity-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 5px;
+}
+
+.quantity-btn {
+  display: block;
+  width: 15%;
+  height: 3vh;
+  font-size: 14px;
+  color: #fff;
+  background-color: #981818;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.quantity-btn:hover {
+  background-color: #218838; /* Cambia el color al pasar el mouse sobre los botones de cantidad */
+}
+
+.quantity-input {
+  width: 30px;
+  text-align: center;
+  margin: 0 5px;
+}
