@@ -1,12 +1,12 @@
     
   .card-container {
       display: flex;
-      justify-content: space-around;
+      justify-content:center;
       flex-wrap: wrap;
       margin-top: 20px;
   }
   .card h3 {
-      font-size: medium;
+      font-size: 100%;
       max-height: 80px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -15,9 +15,11 @@
   .card {
       box-sizing: border-box; /* Ajusta el modelo de caja */
       width: calc(80% / 4 - 20px); /* Ajusta el porcentaje y el margen según sea necesario */
+      min-width: 200px;
       margin-bottom: 20px;
       border: 1px solid #ddd;
       padding: 10px;
+      margin: 5px;
       text-align: center;
       background-color: #fff; /* Fondo blanco para resaltar */
       border-radius: 8px;
@@ -285,3 +287,6 @@
   .search-box{
       top: 30%;
   }
+
+
+  
