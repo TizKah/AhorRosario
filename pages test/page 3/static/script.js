@@ -4,6 +4,7 @@ $(document).ready(function () {
     var totalProducts = 0;
     var totalPages = 0;
     var allProducts = [];
+    var cart = [];
     var filteredProducts = null;
 
     // Cargar la lista de productos desde la base de datos al inicio
@@ -148,18 +149,16 @@ $(document).ready(function () {
                 var quantityContainer = $('<div class="quantity-container"></div>');
                 var decreaseButton = $('<button class="quantity-btn decrease">-</button>');
                 var increaseButton = $('<button class="quantity-btn increase">+</button>');
-                var quantityInput = $('<input type="text" class="quantity-input" value="1" readonly>');
+                
+                var quantityInput = $('<input type="text" class="quantity-input" value="0" readonly>');
+                // Debería ser así:
+                //var quantityInput = $('<input type="text" class="quantity-input" value="'+ product.cart_value + '" readonly>');
 
-                // Manejar el clic en el botón de agregar al carrito
-/*                 increaseButton.on('click', function () {
-                    // Aquí puedes agregar la lógica para agregar el producto al carrito
-                    // Puedes utilizar la información del producto actual (product) para hacerlo
-                }); */
 
                 // Manejar el clic en los botones de cantidad
                 decreaseButton.on('click', function () {
                     var currentQuantity = parseInt(quantityInput.val());
-                    if (currentQuantity > 1) {
+                    if (currentQuantity > 0) {
                         quantityInput.val(currentQuantity - 1);
                     }
                 });
@@ -167,6 +166,7 @@ $(document).ready(function () {
                 increaseButton.on('click', function () {
                     var currentQuantity = parseInt(quantityInput.val());
                     quantityInput.val(currentQuantity + 1);
+                    cart.push(product.description); //Debería ser product.id
                 });
 
                 // Agregar los elementos al contenedor de cantidad
@@ -179,6 +179,7 @@ $(document).ready(function () {
 
                 // Agregar la card al contenedor de resultados
                 resultsContainer.append(resultItem);
+                
 
                 });
 
@@ -191,6 +192,7 @@ $(document).ready(function () {
             paginationContainer.show();
             paginationInfo.show()
             updatePaginationInfo();
+            console.log(cart)
 
             if (currentPage < totalPages) {
                 $('#next-page-btn').show();
