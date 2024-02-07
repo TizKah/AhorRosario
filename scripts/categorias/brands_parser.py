@@ -39,3 +39,5 @@ print(f"Porcentaje de productos que obtuvieron una marca: {porcentaje_con_medida
 
 # Guardar el DataFrame modificado en un nuevo CSV
 df.to_csv('br_' + file_name, index=False)
+
+
