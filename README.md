@@ -1,0 +1,6 @@
+- [ ] Agregar fecha a cada registro
+- [ ] Darle a cada producto una ID dentro de cada supermercado
+- [ ] Tratar de tener una ID general relacionada con cada ID de cada producto de cada supermercado
+- [ ] Hacer alguna inteligencia que obtenga las unidades y los pesos de las descripciones
+- [ ] Crear script que corra todos los scrapers a la vez
+- [ ] Guardar en SQL
