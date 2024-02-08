@@ -4,15 +4,20 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
-import os, time, re, csv, requests, sqlite3
+import os, time, re, requests, sqlite3, pytz
+from datetime import datetime
 from random import randint
 from unity_parser import limpiar_descripcion, extraer_cantidad_y_unidad
 
 LOAD_TIME = 3
 
 ACTUAL_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-# Crea una tabla si no existe
 
+
+
+def get_date():
+    tz_argentina = pytz.timezone('America/Argentina/Buenos_Aires')
+    return datetime.now(tz_argentina)
 
 def internet_connection():
     try:
@@ -34,17 +39,18 @@ def insert_into_db(products):
         image TEXT,
         market TEXT,
         quantity INTEGER,
-        unity TEXT
+        unity TEXT,
+        date DATATIME
     );
     ''')
     for product in products:
         product['quantity'], product['unity'] = extraer_cantidad_y_unidad(product['description'])
         product['description'] = limpiar_descripcion(product['description'])
         conn.execute('''
-        INSERT INTO products (description, price, brand, image, market, quantity, unity)
-        VALUES (?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO products (description, price, brand, image, market, quantity, unity, date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
         ''', (product['description'], product['price'], product['brand'], product['image'], product['market'],
-              product['quantity'],product['unity']))
+              product['quantity'],product['unity'], get_date()))
 
     conn.commit()
     conn.close()
