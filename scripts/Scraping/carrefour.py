@@ -98,6 +98,7 @@ def scrap_category_page(browser,enlace):
         try:
             product["description"] = product_html.find_element(By.XPATH,xpath["description"]).text
             product["price"] = bs4_find_price(product_html,price_id)
+            product["brand"] = 'Unknowed'
             product["image"] = get_image_url(product_element=product_html, image_xpath=xpath["image"])
             product["market"] = "Carrefour"
             products.append(product)
