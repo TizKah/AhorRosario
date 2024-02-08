@@ -3,51 +3,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
-import time, os, sqlite3
+import time, os
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
-import threading
+from database_manage import insert_into_db
 
 ACTUAL_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 
-
-
-
 TIME_LOAD = 2
-
-# Inserta datos en la tabla
-def insert_into_db(products):
-    conn = sqlite3.connect(f'{ACTUAL_DIRECTORY}/products.db')
-    conn.execute('''
-    CREATE TABLE IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        description TEXT,
-        price REAL,
-        brand TEXT,
-        image TEXT,
-        market TEXT
-    );
-    ''')
-    for product in products:
-        conn.execute('''
-        INSERT INTO products (description, price, brand, image, market)
-        VALUES (?, ?, ?, ?, ?);
-        ''', (product['description'], product['price'], product['brand'], product['image'], product['market']))
-
-    conn.commit()
-    conn.close()
-
-""" def write_to_csv(products):
-    with open(f'{ACTUAL_DIRECTORY}/categorias/output_carrefour.csv', mode='a', newline='', encoding='utf-8') as file:
-        file.seek(0, os.SEEK_END)
-        is_empty = file.tell() == 0
-        fieldnames = ['description','price','image','market']
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        
-        if is_empty:
-            writer.writeheader()
-        for product in products:
-            writer.writerow(product) """
 
 def bs4_find_price(product_html,price_id):
     # Obtenemos el HTML del WebElement dado por Selenium
@@ -70,7 +33,7 @@ def load_products(browser):
     browser.execute_script(f"window.scrollTo(0, 0);")
     browser.execute_script(f"window.scrollTo(0, {middle_height});")
 
-def scrap_category_page(browser,enlace):
+def scrap_category_page(browser,enlace,categories_names):
     xpath = {
         "cookie button": "//button[text()='Aceptar todo']",
         "products": "//div[contains(@class, 'valtech-carrefourar-product-summary-status-0-x-container')]",
@@ -105,7 +68,7 @@ def scrap_category_page(browser,enlace):
         except:
             pass
  
-    insert_into_db(products)
+    insert_into_db(products=products,categories_names=categories_names)
 
 def next_page(enlace,page):
     return enlace + f"?page={page}"
@@ -128,7 +91,8 @@ def scrap_category(browser,original_link,subcategory_urls):
         "cookie button": "//button[text()='Aceptar todo']",
         "category number": "//div[contains(@class, 'vtex-button__label flex items-center justify-center h-100 ph5')]"
     }
-    category = get_category(original_link)
+    categories_names = {}
+    categories_names['category'] = get_category(original_link)
 
     for subcategory_url in subcategory_urls:
         browser.get(subcategory_url)
@@ -138,7 +102,7 @@ def scrap_category(browser,original_link,subcategory_urls):
             EC.presence_of_element_located((By.XPATH,xpath["category number"]))
         )
 
-        subcategory = get_category(subcategory_url)
+        categories_names['subcategory'] = get_category(subcategory_url)
         try:
             final_category_number = int(browser.find_elements(By.XPATH,xpath["category number"])[-2].text)
         except:
@@ -146,9 +110,9 @@ def scrap_category(browser,original_link,subcategory_urls):
 
         for page in range(1,final_category_number+1):
             #os.system('cls')
-            print(f"Categoría: {category}\nSubcategoría: {subcategory}\nPágina: {page}.\n")
+            print(f"Categoría: {categories_names['category']}\nSubcategoría: {categories_names['subcategory']}\nPágina: {page}.\n")
             link = next_page(subcategory_url,page)
-            scrap_category_page(browser,link)
+            scrap_category_page(browser,link,categories_names)
 
 def start_browser():
     service = Service(executable_path=f'{ACTUAL_DIRECTORY}/chromedriver.exe')
