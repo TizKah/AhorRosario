@@ -1,0 +1,3 @@
+Base de datos principal:
+
+Global_ID, Market, Local_ID, Name, Description, Unit, Quantity, Price, Brand, Image, Local_Category, Global_Category
