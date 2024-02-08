@@ -103,7 +103,7 @@ def scrap_category_page(browser,enlace):
             products.append(product)
         except:
             pass
-
+ 
     insert_into_db(products)
 
 def next_page(enlace,page):
