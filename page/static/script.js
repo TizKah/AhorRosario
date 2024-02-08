@@ -195,13 +195,13 @@
 
                 if (currentPage < totalPages) {
                     $('#next-page-btn').show();
-                    if (currentPage>1){
-                        $('#back-page-btn').show();
-                    } else{
-                        $('#back-page-btn').hide();
-                    }
                 } else {
                     $('#next-page-btn').hide();
+                }
+                if (currentPage>1){
+                    $('#back-page-btn').show();
+                } else{
+                    $('#back-page-btn').hide();
                 }
             } else {
                 unavailableTxt.show();
