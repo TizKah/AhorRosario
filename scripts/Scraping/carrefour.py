@@ -67,7 +67,6 @@ def scrap_category_page(browser,enlace,categories_names):
             products.append(product)
         except:
             pass
- 
     insert_into_db(products=products,categories_names=categories_names)
 
 def next_page(enlace,page):
@@ -140,10 +139,13 @@ def start_scrap():
         category_name = get_category(original_link)
         browser.quit() """
         #scrap_category(browser,original_link,urls["subcategory"][category_name])
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        for original_link in urls["category"]:
-            category_name = get_category(original_link)
-            executor.submit(thread_scrap_category, original_link,urls["subcategory"][category_name])
+    #with ThreadPoolExecutor(max_workers=1) as executor:
+    for original_link in urls["category"]:
+        category_name = get_category(original_link)
+        print(f"Iniciando scraping para la categoría: {category_name}")
+        browser = start_browser()
+        scrap_category(browser=browser,original_link=original_link,subcategory_urls=urls["subcategory"][category_name])
+            #executor.submit(thread_scrap_category, original_link,urls["subcategory"][category_name])
 
     print("Scrapeo finalizado con éxito.\n")
     browser.quit()
@@ -164,7 +166,7 @@ def get_category_links(browser):
     }
 
     WebDriverWait(browser, 20).until(
-    EC.presence_of_element_located((By.XPATH,xpath["categories button"]))
+    EC.presence_of_all_elements_located((By.XPATH,xpath["categories button"]))
     )
     categories_visibility = browser.find_elements(By.XPATH, xpath["categories button"])[1]
     categories_visibility.click()
@@ -217,13 +219,13 @@ def remove_order_param(url):
     new_url = url_parts[0]
     return new_url
 
-def thread_scrap_category(original_link,subcategory_urls):
+""" def thread_scrap_category(original_link,subcategory_urls):
     category_name = get_category(original_link)
     print(f"Iniciando scraping para la categoría: {category_name}")
     browser = start_browser()
     scrap_category(browser, original_link, subcategory_urls)
 
-    browser.quit()
+    browser.quit() """
 
 
 

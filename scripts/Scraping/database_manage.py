@@ -7,7 +7,7 @@ ACTUAL_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 
 def get_date():
     tz_argentina = pytz.timezone('America/Argentina/Buenos_Aires')
-    return datetime.now(tz_argentina)
+    return datetime.datetime.now(tz_argentina)
 
 # Inserta datos en la tabla
 def insert_into_db(products, categories_names):

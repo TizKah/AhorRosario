@@ -18,20 +18,6 @@ def internet_connection():
         return True
     except:
         return False
-
-""" #Escribe y/o crea el archivo CSV para guardar los datos
-def write_to_csv(products):
-    with open(f'{ACTUAL_DIRECTORY}/categorias/output_jumbo.csv', mode='a', newline='', encoding='utf-8') as file:
-        file.seek(0, os.SEEK_END)
-        is_empty = file.tell() == 0
-        fieldnames = ['description', 'price','brand','image','market']
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        
-        if is_empty:
-            writer.writeheader()
-        for product in products:
-            writer.writerow(product)
- """
 # --
 
 #Scrapear productos por página
