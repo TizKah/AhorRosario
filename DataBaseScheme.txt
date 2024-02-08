@@ -1,0 +1,20 @@
+Base de datos principal:
+
+Global_ID, Market, Local_ID, Name, Description, Unit, Quantity, Price, Brand, Image, Local_Category, Global_Category, Url, Date
+
+Global_ID: ID global, permite identificar un mismo producto que se vende en distintos supermercados.
+Market: El supermercado
+Local_ID: Un ID dentro del mismo supermercado
+Name: Nombre producto
+Description: Toda la información posible del producto
+Unit: Tipo de Unidad en el que se vende
+Quantity: Cantidad de unidades
+Price: Precio
+Brand: Marca
+Image: Podrían ser varias imagenes, tal vez se necesite otra tabla
+Local_Category: Categoría en la que se encuentra en el supermercado de donde se extrajo
+Global_Category: Categoría Global creada por nosotros para poder unificar todas las divisiones que tienen todos los supermercados.
+Url: Desde donde se extrajo.
+Date: Fecha en la cual se obtuvo el dato
+
+La clave sería: Global_ID, Market, Local_ID, Date
