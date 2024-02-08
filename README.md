@@ -6,6 +6,7 @@
 - [ ] Crear script que corra todos los scrapers a la vez
 - [ ] Guardar en SQL
 - [ ] Ver errores de precio -> 'NaN', ' '
+- [ ] Arreglar bug medidas y unidades -> Sólo poner medidas en ciertas categorías
 
 ## Página
 - [ ] Crear GUI carrito
