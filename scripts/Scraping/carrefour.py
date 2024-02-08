@@ -104,6 +104,9 @@ def scrap_category(browser,original_link,subcategory_urls):
 
         categories_names['subcategory'] = get_category(subcategory_url)
         try:
+            total_height = browser.execute_script("return Math.max( document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight );")
+            browser.execute_script(f"window.scrollTo(0, {total_height});")
+            time.sleep(TIME_LOAD)
             final_category_number = int(browser.find_elements(By.XPATH,xpath["category number"])[-2].text)
         except:
             final_category_number = 1
@@ -120,6 +123,7 @@ def start_browser():
     chrome_options.add_argument('--headless=new')
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument('--log-level=1')
+    chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
     browser = webdriver.Chrome(service=service, options=chrome_options)
     browser.get("https://www.carrefour.com.ar/")
     return browser    
@@ -136,7 +140,7 @@ def start_scrap():
         category_name = get_category(original_link)
         browser.quit() """
         #scrap_category(browser,original_link,urls["subcategory"][category_name])
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    with ThreadPoolExecutor(max_workers=1) as executor:
         for original_link in urls["category"]:
             category_name = get_category(original_link)
             executor.submit(thread_scrap_category, original_link,urls["subcategory"][category_name])
@@ -166,12 +170,12 @@ def get_category_links(browser):
     categories_visibility.click()
     categories = browser.find_elements(By.XPATH,xpath["categories class"])
 
-    time.sleep(5)
+    time.sleep(10)
     try:
         browser.find_elements(By.XPATH, xpath["cookies button"])[1].click()
     except:
         pass
-    
+
     for category in categories:
         category.click()
         try:
