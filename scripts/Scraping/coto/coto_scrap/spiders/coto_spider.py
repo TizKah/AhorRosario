@@ -1,7 +1,7 @@
-import scrapy
-import csv, os
+import os, sqlite3, scrapy
 
 ACTUAL_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+DATABASE_PATH = os.path.join(ACTUAL_DIRECTORY, '..', '..','..', 'products.db')
 
 class CotoSpider(scrapy.Spider):
     name = "coto"
@@ -21,30 +21,39 @@ class CotoSpider(scrapy.Spider):
 
             product_price = product_html.xpath(".//*[contains(@class, 'atg_store_newPrice')]/text()").get().strip()
             product["price"] = product_price
+            product["brand"] = 'Unknowed'
             
             product["image"] = product_html.xpath('.//span[@class="atg_store_productImage"]/img/@src').get()
 
-            product["supermercado"] = "Coto"
+            product["market"] = "Coto"
 
             products.append(product)
 
-        self.write_to_csv(products)
+        self.insert_into_db(products)
 
         next_page = response.xpath("//a[@title='Siguiente']/@href").get()
         if next_page is not None:
             yield response.follow(next_page,self.parse)
 
+    def insert_into_db(self, products):
+        conn = sqlite3.connect(DATABASE_PATH)
+        conn.execute('''
+        CREATE TABLE IF NOT EXISTS products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            description TEXT,
+            price REAL,
+            brand TEXT,
+            image TEXT,
+            market TEXT
+        );
+        ''')
+        for product in products:
+            conn.execute('''
+            INSERT INTO products (description, price, brand, image, market)
+            VALUES (?, ?, ?, ?, ?);
+            ''', (product['description'], product['price'], product['brand'], product['image'], product['market']))
 
-    def write_to_csv(self, products):
-        with open(f'{ACTUAL_DIRECTORY}/output_jumbo.csv', mode='a', newline='', encoding='utf-8') as file:
-            file.seek(0, os.SEEK_END)
-            is_empty = file.tell() == 0
-            fieldnames = ['description', 'price','image','supermercado']
-            writer = csv.DictWriter(file, fieldnames=fieldnames)
-            
-            if is_empty:
-                writer.writeheader()
-            for product in products:
-                writer.writerow(product)
+        conn.commit()
+        conn.close()
 
 

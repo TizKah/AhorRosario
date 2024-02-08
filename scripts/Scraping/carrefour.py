@@ -3,8 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
-import time, os
-import csv
+import time, os, sqlite3
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 import threading
@@ -16,7 +15,29 @@ ACTUAL_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 
 TIME_LOAD = 2
 
-def write_to_csv(products):
+# Inserta datos en la tabla
+def insert_into_db(products):
+    conn = sqlite3.connect(f'{ACTUAL_DIRECTORY}/products.db')
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        description TEXT,
+        price REAL,
+        brand TEXT,
+        image TEXT,
+        market TEXT
+    );
+    ''')
+    for product in products:
+        conn.execute('''
+        INSERT INTO products (description, price, brand, image, market)
+        VALUES (?, ?, ?, ?, ?);
+        ''', (product['description'], product['price'], product['brand'], product['image'], product['market']))
+
+    conn.commit()
+    conn.close()
+
+""" def write_to_csv(products):
     with open(f'{ACTUAL_DIRECTORY}/categorias/output_carrefour.csv', mode='a', newline='', encoding='utf-8') as file:
         file.seek(0, os.SEEK_END)
         is_empty = file.tell() == 0
@@ -26,7 +47,7 @@ def write_to_csv(products):
         if is_empty:
             writer.writeheader()
         for product in products:
-            writer.writerow(product)
+            writer.writerow(product) """
 
 def bs4_find_price(product_html,price_id):
     # Obtenemos el HTML del WebElement dado por Selenium
@@ -83,7 +104,7 @@ def scrap_category_page(browser,enlace):
         except:
             pass
 
-    write_to_csv(products)
+    insert_into_db(products)
 
 def next_page(enlace,page):
     return enlace + f"?page={page}"
