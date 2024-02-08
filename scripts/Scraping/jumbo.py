@@ -28,7 +28,7 @@ def internet_connection():
 
 
 # Inserta datos en la tabla
-def insert_into_db(products):
+def insert_into_db(products, categories_names):
     conn = sqlite3.connect(f'{ACTUAL_DIRECTORY}/products.db')
     conn.execute('''
     CREATE TABLE IF NOT EXISTS products (
@@ -40,17 +40,19 @@ def insert_into_db(products):
         market TEXT,
         quantity INTEGER,
         unity TEXT,
-        date DATATIME
+        date DATATIME,
+        category TEXT,
+        subcategory TEXT
     );
     ''')
     for product in products:
         product['quantity'], product['unity'] = extraer_cantidad_y_unidad(product['description'])
         product['description'] = limpiar_descripcion(product['description'])
         conn.execute('''
-        INSERT INTO products (description, price, brand, image, market, quantity, unity, date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO products (description, price, brand, image, market, quantity, unity, date, category, subcategory)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         ''', (product['description'], product['price'], product['brand'], product['image'], product['market'],
-              product['quantity'],product['unity'], get_date()))
+              product['quantity'],product['unity'], get_date(),categories_names['category'],categories_names['subcategory']))
 
     conn.commit()
     conn.close()
@@ -71,7 +73,7 @@ def write_to_csv(products):
 # --
 
 #Scrapear productos por página
-def category_products_page(browser,page_url,is_final_page):
+def category_products_page(browser,page_url,is_final_page,categories_names):
     browser.get(page_url)
     xpath = {
         "product card": "//article[contains(@class,'vtex-product-summary-2-x-element pointer pt3 pb4 flex flex-column h-100')]",
@@ -92,10 +94,10 @@ def category_products_page(browser,page_url,is_final_page):
             products.append(product)
 
     if product!={}:
-        insert_into_db(products=products)
+        insert_into_db(products=products,categories_names=categories_names)
 
 #Scrapear productos de una categoría
-def category_products(browser,link):
+def category_products(browser,link,categories_names):
     xpath = {
         "next button": "//button[@class='vtex-button bw1 ba fw5 v-mid relative pa0 lh-solid br2 min-h-small t-action--small bg-action-primary b--action-primary c-on-action-primary hover-bg-action-primary hover-b--action-primary hover-c-on-action-primary pointer ']",
         "text with pages numbers": "//span[@class='discoargentina-search-result-custom-1-x-span-selector-pages']"
@@ -109,7 +111,10 @@ def category_products(browser,link):
     for page_number in range(1,total_pages+1):
         print(str(page_number)," páginas cargadas de ", str(total_pages),"\n")
         next_page_url = get_new_page_link(link=link,page_number=page_number)
-        category_products_page(browser=browser,page_url=next_page_url,is_final_page=(page_number==total_pages))
+        category_products_page(browser=browser,
+                               page_url=next_page_url,
+                               is_final_page=(page_number==total_pages),
+                               categories_names=categories_names)
 
 
 
@@ -316,11 +321,13 @@ def start_scrap():
     urls = get_category_links(browser)
     subcategory_urls = get_subcategory_links(browser=browser, urls_element=urls["elements"])
     print("Enlaces obtenidos con éxito.\n")
-
-    for url in subcategory_urls:
+    categories_names = {}
+    categories_names['category'] = get_category_name(url=url).upper()
+    categories_names['subcategory'] = get_subcategory_name(url=url).upper()
+    for url in subcategory_urls: 
         os.system('cls')
-        print("Categoria: ", get_category_name(url=url).upper(), "\nSubcategoria: ",get_subcategory_name(url=url).upper())
-        category_products(browser=browser, link=url)
+        print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
+        category_products(browser=browser, link=url, categories_names=categories_names)
     
     browser.quit()
 
