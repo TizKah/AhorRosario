@@ -167,8 +167,11 @@ def get_category_links(browser):
     categories = browser.find_elements(By.XPATH,xpath["categories class"])
 
     time.sleep(5)
-    browser.find_elements(By.XPATH, xpath["cookies button"])[1].click()
-
+    try:
+        browser.find_elements(By.XPATH, xpath["cookies button"])[1].click()
+    except:
+        pass
+    
     for category in categories:
         category.click()
         try:
