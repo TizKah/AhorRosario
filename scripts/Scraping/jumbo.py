@@ -321,10 +321,10 @@ def start_scrap():
     urls = get_category_links(browser)
     subcategory_urls = get_subcategory_links(browser=browser, urls_element=urls["elements"])
     print("Enlaces obtenidos con éxito.\n")
-    categories_names = {}
-    categories_names['category'] = get_category_name(url=url).upper()
-    categories_names['subcategory'] = get_subcategory_name(url=url).upper()
     for url in subcategory_urls: 
+        categories_names = {}
+        categories_names['category'] = get_category_name(url=url).upper()
+        categories_names['subcategory'] = get_subcategory_name(url=url).upper()
         os.system('cls')
         print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
         category_products(browser=browser, link=url, categories_names=categories_names)
