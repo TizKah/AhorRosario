@@ -4,12 +4,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
-import os, time, re, csv, requests
+import os, time, re, csv, requests, sqlite3
 from random import randint
 
 LOAD_TIME = 3
 
 ACTUAL_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+# Crea una tabla si no existe
 
 
 def internet_connection():
@@ -19,7 +20,30 @@ def internet_connection():
     except:
         return False 
 
-#Escribe y/o crea el archivo CSV para guardar los datos
+
+# Inserta datos en la tabla
+def insert_into_db(products):
+    conn = sqlite3.connect(f'{ACTUAL_DIRECTORY}/products.db')
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        description TEXT,
+        price REAL,
+        brand TEXT,
+        image TEXT,
+        market TEXT
+    );
+    ''')
+    for product in products:
+        conn.execute('''
+        INSERT INTO products (description, price, brand, image, market)
+        VALUES (?, ?, ?, ?, ?);
+        ''', (product['description'], product['price'], product['brand'], product['image'], product['market']))
+
+    conn.commit()
+    conn.close()
+
+""" #Escribe y/o crea el archivo CSV para guardar los datos
 def write_to_csv(products):
     with open(f'{ACTUAL_DIRECTORY}/categorias/output_jumbo.csv', mode='a', newline='', encoding='utf-8') as file:
         file.seek(0, os.SEEK_END)
@@ -31,7 +55,7 @@ def write_to_csv(products):
             writer.writeheader()
         for product in products:
             writer.writerow(product)
-
+ """
 # --
 
 #Scrapear productos por página
@@ -56,7 +80,7 @@ def category_products_page(browser,page_url,is_final_page):
             products.append(product)
 
     if product!={}:
-        write_to_csv(products=products)
+        insert_into_db(products=products)
 
 #Scrapear productos de una categoría
 def category_products(browser,link):
