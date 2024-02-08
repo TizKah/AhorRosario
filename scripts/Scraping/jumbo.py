@@ -204,6 +204,8 @@ def get_product_info(browser,xpath,product_element):
     while True:
         try:
             product["price"] = product_element.find_element(By.XPATH, xpath["price"]).text
+            while product["price"] == '' or product["price"]== '$NaN':
+                product["price"] = product_element.find_element(By.XPATH, xpath["price"]).text
             product["description"] = product_element.find_element(By.XPATH, xpath["description"]).text
             product["brand"] = product_element.find_element(By.XPATH, xpath["brand"]).text
             product["market"] = "Jumbo"      
