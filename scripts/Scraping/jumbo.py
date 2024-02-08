@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 import os, time, re, csv, requests, sqlite3
 from random import randint
+from unity_parser import limpiar_descripcion, extraer_cantidad_y_unidad
 
 LOAD_TIME = 3
 
@@ -18,7 +19,7 @@ def internet_connection():
         response = requests.get("https://www.jumbo.com.ar/", timeout=5) 
         return True
     except:
-        return False 
+        return False
 
 
 # Inserta datos en la tabla
@@ -26,19 +27,24 @@ def insert_into_db(products):
     conn = sqlite3.connect(f'{ACTUAL_DIRECTORY}/products.db')
     conn.execute('''
     CREATE TABLE IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        local_ID INTEGER PRIMARY KEY AUTOINCREMENT,
         description TEXT,
         price REAL,
         brand TEXT,
         image TEXT,
-        market TEXT
+        market TEXT,
+        quantity INTEGER,
+        unity TEXT
     );
     ''')
     for product in products:
+        product['quantity'], product['unity'] = extraer_cantidad_y_unidad(product['description'])
+        product['description'] = limpiar_descripcion(product['description'])
         conn.execute('''
-        INSERT INTO products (description, price, brand, image, market)
-        VALUES (?, ?, ?, ?, ?);
-        ''', (product['description'], product['price'], product['brand'], product['image'], product['market']))
+        INSERT INTO products (description, price, brand, image, market, quantity, unity)
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+        ''', (product['description'], product['price'], product['brand'], product['image'], product['market'],
+              product['quantity'],product['unity']))
 
     conn.commit()
     conn.close()
