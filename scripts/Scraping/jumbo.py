@@ -42,7 +42,9 @@ def category_products_page(browser,page_url,is_final_page,categories_names):
             products.append(product)
 
     if product!={}:
-        insert_into_db(products=products,categories_names=categories_names)
+        insert_into_db(products=products,
+                       categories_names=categories_names,
+                       page_url=page_url)
 
 #Scrapear productos de una categoría
 def category_products(browser,link,categories_names):

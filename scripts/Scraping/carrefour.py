@@ -67,7 +67,7 @@ def scrap_category_page(browser,enlace,categories_names):
             products.append(product)
         except:
             pass
-    insert_into_db(products=products,categories_names=categories_names)
+    insert_into_db(products=products,categories_names=categories_names, page_url=enlace)
 
 def next_page(enlace,page):
     return enlace + f"?page={page}"
