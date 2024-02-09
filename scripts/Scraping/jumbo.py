@@ -287,4 +287,40 @@ def start_scrap():
 
 # ERROR DE LA PÁGINA: https://www.jumbo.com.ar/Bebidas/Champagnes?page=3
 
-start_scrap()
+
+# -- Implementación de Threads
+import threading
+MAX_CONCURRENT_THREADS = 3  # Puedes ajustar este número según tus necesidades
+thread_semaphore = threading.Semaphore(MAX_CONCURRENT_THREADS)
+
+def scrape_subcategory(url, categories_names):
+    with thread_semaphore:
+        browser = start_browser(True)
+        print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
+        category_products(browser=browser, link=url, categories_names=categories_names)
+        browser.quit()
+
+def start_scrap_with_threads():
+    browser = start_browser(True)
+    urls = get_category_links(browser)
+    subcategory_urls = get_subcategory_links(browser=browser, urls_element=urls["elements"])
+    browser.quit()
+
+    threads = []
+    for url in subcategory_urls:
+        categories_names = {
+            'category': get_category_name(url=url).upper(),
+            'subcategory': get_subcategory_name(url=url).upper()
+        }
+
+        thread = threading.Thread(target=scrape_subcategory, args=(url, categories_names))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+start_scrap_with_threads()
+
+
+#start_scrap()
