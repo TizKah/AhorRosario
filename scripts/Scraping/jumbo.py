@@ -239,7 +239,7 @@ def get_subcategory_links(browser,urls_element):
     for url_element in urls_element:
         actions = ActionChains(browser) 
         actions.move_to_element(url_element).perform()
-        time.sleep(LOAD_TIME)
+        time.sleep(LOAD_TIME*3)
 
         alone_subcategory_urls_element = browser.find_elements(By.XPATH, xpath["alone subcategory class"])
         not_alone_subcategory_urls_element = browser.find_elements(By.XPATH, xpath["not alone subcategory class"])
@@ -261,35 +261,6 @@ def start_browser(headless):
     browser.get("https://www.jumbo.com.ar/")
     return browser 
 
-#Main del programa sin threads
-def start_scrap_WITHOUT_THREADS():
-    browser = start_browser(True)
-    os.system('cls')
-    print("Obteniendo enlaces...\n")
-    urls = get_category_links(browser)
-    subcategory_urls = get_subcategory_links(browser=browser, urls_element=urls["elements"])
-    print("Enlaces obtenidos con éxito.\n")
-    for url in subcategory_urls: 
-        categories_names = {
-            'category': get_category_name(url=url).upper(),
-            'subcategory': get_subcategory_name(url=url).upper()
-        }
-
-        os.system('cls')
-        print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
-        try:
-            category_products(browser=browser, link=url, categories_names=categories_names)
-        except Exception as e:
-            with open(f"{ACTUAL_DIRECTORY}/log.txt", "w+") as f:
-                f.write(f"""Categoría: {categories_names['category']}\n
-                        Subcategoría: {categories_names['subcategory']}\n
-                        Error: {e}\n""")
-
-        subcategory_urls.remove(url)
-    
-    browser.quit()
-
-
 
 # ERROR DE LA PÁGINA: https://www.jumbo.com.ar/Bebidas/Champagnes?page=3
 # ERROR DE LA PÁGINA:  https://www.jumbo.com.ar/tiempo-libre/libreria?page=50
@@ -297,7 +268,7 @@ def start_scrap_WITHOUT_THREADS():
 
 # -- Implementación de Threads --
 import threading
-MAX_CONCURRENT_THREADS = 3  # Puedes ajustar este número según tus necesidades
+MAX_CONCURRENT_THREADS = 2  # Puedes ajustar este número según tus necesidades
 thread_semaphore = threading.Semaphore(MAX_CONCURRENT_THREADS)
 
 def scrape_subcategory(url, categories_names):
@@ -307,19 +278,16 @@ def scrape_subcategory(url, categories_names):
         try:
             category_products(browser=browser, link=url, categories_names=categories_names)
         except Exception as e:
-            with open(f"{ACTUAL_DIRECTORY}/log.txt", "w+") as f:
+            with open(f"{ACTUAL_DIRECTORY}/log.txt", "a+") as f:
                 f.write(f"""Categoría: {categories_names['category']}\n
                         Subcategoría: {categories_names['subcategory']}\n
                         Error: {e}\n""")
 
         browser.quit()
 
-def start_scrap_with_threads():
-    browser = start_browser(True)
-    urls = get_category_links(browser)
-    subcategory_urls = get_subcategory_links(browser=browser, urls_element=urls["elements"])
-    browser.quit()
 
+def scrap_with_threads(browser,subcategory_urls):
+    browser.quit()
     threads = []
     for url in subcategory_urls:
         categories_names = {
@@ -335,7 +303,52 @@ def start_scrap_with_threads():
     for thread in threads:
         thread.join()
 
-start_scrap_with_threads()
+def scrap_without_threads(browser,subcategory_urls):
+    for url in subcategory_urls: 
+        categories_names = {
+            'category': get_category_name(url=url).upper(),
+            'subcategory': get_subcategory_name(url=url).upper()
+        }
+
+        os.system('cls')
+        print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
+        try:
+            category_products(browser=browser, link=url, categories_names=categories_names)
+        except Exception as e:
+            with open(f"{ACTUAL_DIRECTORY}/log.txt", "a+") as f:
+                f.write(f"""Categoría: {categories_names['category']}\n
+                        Subcategoría: {categories_names['subcategory']}\n
+                        Error: {e}\n""")
+
+        subcategory_urls.remove(url)
+    
+    browser.quit()
+
+def start_scrap(threads):
+    browser = start_browser(True)
+    subcategory_urls = manage_category_links(browser=browser)
+
+    if threads:
+        scrap_with_threads(browser=browser,subcategory_urls=subcategory_urls)
+    else:
+        scrap_without_threads(browser=browser,subcategory_urls=subcategory_urls)
 
 
-#start_scrap()
+def manage_category_links(browser):
+    os.system('cls')
+    print("Obteniendo enlaces...\n")
+    subcategory_urls = []
+    try:
+        with open('jumbo_links.txt','r') as urls_file:
+            for line in urls_file:
+                subcategory_urls.append(line.strip().replace('\n', ''))
+    except:
+        urls = get_category_links(browser)
+        subcategory_urls = get_subcategory_links(browser=browser, urls_element=urls["elements"])
+        with open('jumbo_links.txt','w+') as urls_file:
+            for url in subcategory_urls:
+                urls_file.write("%s\n" % url)
+    print("Enlaces obtenidos con éxito.\n")
+    return subcategory_urls
+
+start_scrap(threads=True)

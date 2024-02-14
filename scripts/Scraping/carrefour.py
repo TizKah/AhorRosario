@@ -122,6 +122,7 @@ def start_browser():
     chrome_options.add_argument('--headless=new')
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument('--log-level=1')
+    #chrome_options.setPageLoadStrategy(PageLoadStrategy.NONE);
     chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
     browser = webdriver.Chrome(service=service, options=chrome_options)
     browser.get("https://www.carrefour.com.ar/")
