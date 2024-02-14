@@ -59,8 +59,8 @@ def category_products(browser,link,categories_names):
         return
 
     for page_number in range(1,total_pages+1):
-        print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
-        print(str(page_number)," páginas cargadas de ", str(total_pages),"\n")
+        """ print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
+        print(str(page_number)," páginas cargadas de ", str(total_pages),"\n") """
         next_page_url = get_new_page_link(link=link,page_number=page_number)
         category_products_page(browser=browser,
                                page_url=next_page_url,
@@ -86,10 +86,10 @@ def get_all_page_products_cards(browser,xpath,is_final_page):
     height = browser.execute_script("return document.body.scrollHeight")
     while len(products_element)<20:
         
-        if not internet_connection():
+        """ if not internet_connection():
             print("Error de conexión, reiniciando página...")
             browser.refresh()
-            continue
+            continue """
 
         browser.execute_script("window.scrollTo(0, window.scrollY + 500);")
         browser.execute_script("window.scrollTo(0, window.scrollY + 500);")
@@ -104,7 +104,7 @@ def get_all_page_products_cards(browser,xpath,is_final_page):
         except:
             pass
         scroll_complete_page(browser=browser,height=height)
-        print(f"Cargados {len(products_element)} elementos\n")
+        """ print(f"Cargados {len(products_element)} elementos\n") """
         if is_final_page:
             break
     return products_element
@@ -132,7 +132,7 @@ def get_products_pages_numbers(browser, text_xpath):
                         "final":'empty page'}
             
             browser.refresh()
-            time.sleep(LOAD_TIME)
+            #time.sleep(LOAD_TIME)
     
     actual_products=-1
     max_products=0
@@ -177,7 +177,7 @@ def get_image_url(product_element,image_xpath):
             product_element.execute_script(scroll_js_code, product_element)
             image = product_element.find_element(By.XPATH, image_xpath).get_attribute('src')
             print("Esperando imagen de producto...")
-            time.sleep(LOAD_TIME)
+            #time.sleep(LOAD_TIME)
     return image
 
 # Devuelve el nombre de la categoría de la url dada
@@ -261,8 +261,8 @@ def start_browser(headless):
     browser.get("https://www.jumbo.com.ar/")
     return browser 
 
-#Main del programa
-def start_scrap():
+#Main del programa sin threads
+def start_scrap_WITHOUT_THREADS():
     browser = start_browser(True)
     os.system('cls')
     print("Obteniendo enlaces...\n")
@@ -270,12 +270,22 @@ def start_scrap():
     subcategory_urls = get_subcategory_links(browser=browser, urls_element=urls["elements"])
     print("Enlaces obtenidos con éxito.\n")
     for url in subcategory_urls: 
-        categories_names = {}
-        categories_names['category'] = get_category_name(url=url).upper()
-        categories_names['subcategory'] = get_subcategory_name(url=url).upper()
+        categories_names = {
+            'category': get_category_name(url=url).upper(),
+            'subcategory': get_subcategory_name(url=url).upper()
+        }
+
         os.system('cls')
         print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
-        category_products(browser=browser, link=url, categories_names=categories_names)
+        try:
+            category_products(browser=browser, link=url, categories_names=categories_names)
+        except Exception as e:
+            with open(f"{ACTUAL_DIRECTORY}/log.txt", "w+") as f:
+                f.write(f"""Categoría: {categories_names['category']}\n
+                        Subcategoría: {categories_names['subcategory']}\n
+                        Error: {e}\n""")
+
+        subcategory_urls.remove(url)
     
     browser.quit()
 
@@ -285,16 +295,23 @@ def start_scrap():
 # ERROR DE LA PÁGINA:  https://www.jumbo.com.ar/tiempo-libre/libreria?page=50
 
 
-# -- Implementación de Threads
+# -- Implementación de Threads --
 import threading
-MAX_CONCURRENT_THREADS = 4  # Puedes ajustar este número según tus necesidades
+MAX_CONCURRENT_THREADS = 3  # Puedes ajustar este número según tus necesidades
 thread_semaphore = threading.Semaphore(MAX_CONCURRENT_THREADS)
 
 def scrape_subcategory(url, categories_names):
     with thread_semaphore:
         browser = start_browser(True)
         print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
-        category_products(browser=browser, link=url, categories_names=categories_names)
+        try:
+            category_products(browser=browser, link=url, categories_names=categories_names)
+        except Exception as e:
+            with open(f"{ACTUAL_DIRECTORY}/log.txt", "w+") as f:
+                f.write(f"""Categoría: {categories_names['category']}\n
+                        Subcategoría: {categories_names['subcategory']}\n
+                        Error: {e}\n""")
+
         browser.quit()
 
 def start_scrap_with_threads():
@@ -313,6 +330,7 @@ def start_scrap_with_threads():
         thread = threading.Thread(target=scrape_subcategory, args=(url, categories_names))
         threads.append(thread)
         thread.start()
+        subcategory_urls.remove(url)
 
     for thread in threads:
         thread.join()
