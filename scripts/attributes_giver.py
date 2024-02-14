@@ -4,8 +4,8 @@
 import pandas as pd
 import os, re, csv, sqlite3, argparse
 
-
-file_name = 'coto.csv'
+ACTUAL_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+file_name = 'Coto 15-1.csv'
 
 def get_brands():
     csv_file = 'output_jumbo.csv'
@@ -47,10 +47,6 @@ def main_brand_giver():
 
 
 
-
-# Ruta donde se encuentran los archivos CSV
-csv_folder = os.path.join(os.getcwd(), 'csv')
-
 def create_table(conn):
     cursor = conn.cursor()
     cursor.execute('''
@@ -58,7 +54,6 @@ def create_table(conn):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             description TEXT,
             price FLOAT,
-            image TEXT,
             brand TEXT,
             market TEXT
         )
@@ -66,8 +61,7 @@ def create_table(conn):
     conn.commit()
 
 def insert_data(conn, filename):
-    file_path = os.path.join(csv_folder, filename)
-    with open(file_path, 'r', encoding='utf-8') as csv_file:
+    with open(f"{ACTUAL_DIRECTORY}/{filename}", 'r', encoding='utf-8') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
             # Obtener el valor de brand, si no existe, asignar None
@@ -75,19 +69,19 @@ def insert_data(conn, filename):
             
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO products (description, price, image, brand, market)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (row['description'], row['price'], row['image'], brand, row['market']))
+                INSERT INTO products (description, price, brand, market)
+                VALUES (?, ?, ?, ?)
+            ''', (row['description'], row['price'], brand, row['supermercado']))
             conn.commit()
 
 def main_csv_to_sql():
-    conn = sqlite3.connect('products.db')  # Conexión a la base de datos SQLite
+    conn = sqlite3.connect(f'{ACTUAL_DIRECTORY}/{file_name.split('.')[0]}.db')  # Conexión a la base de datos SQLite
     create_table(conn)  # Crear tabla si no existe
 
     # Cargar datos de los archivos CSV a la base de datos
-    insert_data(conn, 'coto.csv')
-    insert_data(conn, 'carrefour.csv')
-    insert_data(conn, 'jumbo.csv')
+    insert_data(conn, file_name)
+    #insert_data(conn, 'carrefour.csv')
+    #insert_data(conn, 'jumbo.csv')
 
     conn.close()
 

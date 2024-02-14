@@ -59,6 +59,7 @@ def category_products(browser,link,categories_names):
         return
 
     for page_number in range(1,total_pages+1):
+        print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
         print(str(page_number)," páginas cargadas de ", str(total_pages),"\n")
         next_page_url = get_new_page_link(link=link,page_number=page_number)
         category_products_page(browser=browser,
@@ -255,12 +256,7 @@ def start_browser(headless):
         chrome_options.add_argument('--headless=new')
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument('--log-level=1')
-    chrome_options.add_experimental_option(
-        "prefs", {
-            # block image loading
-            "profile.managed_default_content_settings.images": 2,
-        }
-    )
+    chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
     browser = webdriver.Chrome(service=service, options=chrome_options)
     browser.get("https://www.jumbo.com.ar/")
     return browser 
@@ -286,11 +282,12 @@ def start_scrap():
 
 
 # ERROR DE LA PÁGINA: https://www.jumbo.com.ar/Bebidas/Champagnes?page=3
+# ERROR DE LA PÁGINA:  https://www.jumbo.com.ar/tiempo-libre/libreria?page=50
 
 
 # -- Implementación de Threads
 import threading
-MAX_CONCURRENT_THREADS = 3  # Puedes ajustar este número según tus necesidades
+MAX_CONCURRENT_THREADS = 4  # Puedes ajustar este número según tus necesidades
 thread_semaphore = threading.Semaphore(MAX_CONCURRENT_THREADS)
 
 def scrape_subcategory(url, categories_names):
