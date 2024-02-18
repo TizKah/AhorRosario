@@ -8,5 +8,8 @@ import scrapy
 
 class CotoScrapItem(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    description = scrapy.Field()
+    price = scrapy.Field()
+    brand = scrapy.Field()
+    image = scrapy.Field()
+    market = scrapy.Field()

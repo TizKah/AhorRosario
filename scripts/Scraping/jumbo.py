@@ -23,6 +23,7 @@ def internet_connection():
 #Scrapear productos por página
 def category_products_page(browser,page_url,is_final_page,categories_names):
     browser.get(page_url)
+    browser.execute_script("document.body.style.zoom='30%'")
     xpath = {
         "product card": "//article[contains(@class,'vtex-product-summary-2-x-element pointer pt3 pb4 flex flex-column h-100')]",
         "price": ".//div[@class='jumboargentinaio-store-theme-1dCOMij_MzTzZOCohX1K7w']",
@@ -54,9 +55,15 @@ def category_products(browser,link,categories_names):
     }
 
     browser.get(link)
+    browser.execute_script("document.body.style.zoom='30%'")
+
     total_pages = get_products_pages_numbers(browser=browser,text_xpath=xpath["text with pages numbers"])["final"]
     if total_pages==0 or total_pages=='empty page':
         return
+    
+    # BUG DE PÁGINA AL PASAR PÁGINA 50
+    if total_pages>50:
+        total_pages=50
 
     for page_number in range(1,total_pages+1):
         """ print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
@@ -91,19 +98,23 @@ def get_all_page_products_cards(browser,xpath,is_final_page):
             browser.refresh()
             continue """
 
-        browser.execute_script("window.scrollTo(0, window.scrollY + 500);")
+        """ browser.execute_script("window.scrollTo(0, window.scrollY + 500);")
         browser.execute_script("window.scrollTo(0, window.scrollY + 500);")
         browser.execute_script(f"window.scrollTo(0, {height//2});")
-        browser.execute_script("window.scrollTo(0, window.scrollY + 500);")
+        browser.execute_script("window.scrollTo(0, window.scrollY + 500);") """
         """ products_element= WebDriverWait(browser, 50).until(
             EC.presence_of_all_elements_located((By.XPATH, xpath["product card"]))
-        ) """
+        )
+        """
         products_element = browser.find_elements(By.XPATH, xpath["product card"])
         try:
             browser.execute_script(scroll_to_element_js_code, products_element[-1])
         except:
-            pass
-        scroll_complete_page(browser=browser,height=height)
+            pass 
+        #scroll_complete_page(browser=browser,height=height)
+        browser.execute_script(f"window.scrollTo(0, {height});")
+        #browser.execute_script("window.scrollTo(0, window.scrollY + 500);")
+        
         """ print(f"Cargados {len(products_element)} elementos\n") """
         if is_final_page:
             break
@@ -256,24 +267,24 @@ def start_browser(headless):
         chrome_options.add_argument('--headless=new')
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument('--log-level=1')
+    chrome_options.add_argument('--blink-settings=imagesEnabled=false')
     chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
     browser = webdriver.Chrome(service=service, options=chrome_options)
-    browser.get("https://www.jumbo.com.ar/")
     return browser 
 
 
 # ERROR DE LA PÁGINA: https://www.jumbo.com.ar/Bebidas/Champagnes?page=3
 # ERROR DE LA PÁGINA:  https://www.jumbo.com.ar/tiempo-libre/libreria?page=50
-
+# BUG DE PÁGINA AL PASAR PÁGINA 50 -> si total_page>50 entonces total_page=50
 
 # -- Implementación de Threads --
 import threading
-MAX_CONCURRENT_THREADS = 2  # Puedes ajustar este número según tus necesidades
+MAX_CONCURRENT_THREADS = 3  # Puedes ajustar este número según tus necesidades
 thread_semaphore = threading.Semaphore(MAX_CONCURRENT_THREADS)
 
 def scrape_subcategory(url, categories_names):
     with thread_semaphore:
-        browser = start_browser(True)
+        browser = start_browser(False)
         print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
         try:
             category_products(browser=browser, link=url, categories_names=categories_names)
@@ -290,6 +301,7 @@ def scrap_with_threads(browser,subcategory_urls):
     browser.quit()
     threads = []
     for url in subcategory_urls:
+        print(url)
         categories_names = {
             'category': get_category_name(url=url).upper(),
             'subcategory': get_subcategory_name(url=url).upper()
@@ -298,7 +310,7 @@ def scrap_with_threads(browser,subcategory_urls):
         thread = threading.Thread(target=scrape_subcategory, args=(url, categories_names))
         threads.append(thread)
         thread.start()
-        subcategory_urls.remove(url)
+        #subcategory_urls.remove(url)
 
     for thread in threads:
         thread.join()
@@ -320,14 +332,15 @@ def scrap_without_threads(browser,subcategory_urls):
                         Subcategoría: {categories_names['subcategory']}\n
                         Error: {e}\n""")
 
-        subcategory_urls.remove(url)
+        #subcategory_urls.remove(url)
     
     browser.quit()
 
 def start_scrap(threads):
     browser = start_browser(True)
+    browser.get("https://www.jumbo.com.ar/")
     subcategory_urls = manage_category_links(browser=browser)
-
+    print(subcategory_urls)
     if threads:
         scrap_with_threads(browser=browser,subcategory_urls=subcategory_urls)
     else:
@@ -347,7 +360,8 @@ def manage_category_links(browser):
         subcategory_urls = get_subcategory_links(browser=browser, urls_element=urls["elements"])
         with open('jumbo_links.txt','w+') as urls_file:
             for url in subcategory_urls:
-                urls_file.write("%s\n" % url)
+                if url!="https://www.jumbo.com.ar/-":
+                    urls_file.write("%s\n" % url)
     print("Enlaces obtenidos con éxito.\n")
     return subcategory_urls
 
