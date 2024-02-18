@@ -12,7 +12,7 @@ def get_date():
 # Inserta datos en la tabla
 def insert_into_db(products, categories_names, page_url):
     e = 'database is locked'
-    while e == 'database is locked':
+    while e == 'database is locked' or e == 'brand':
         conn = sqlite3.connect(f'{ACTUAL_DIRECTORY}/products.db', timeout=10)
         try:
             conn.execute('''
@@ -49,4 +49,7 @@ def insert_into_db(products, categories_names, page_url):
                         Categoría: {categories_names['category']}\n
                         Subcategoría: {categories_names['subcategory']}\n
                         Error: {e}\n""")
+            if e == 'brand':
+                product['brand'] = 'Error'
+        
         conn.close()
