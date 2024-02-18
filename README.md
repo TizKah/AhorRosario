@@ -4,8 +4,6 @@
 - [ ] Tratar de tener una ID general relacionada con cada ID de cada producto de cada supermercado
 - [ ] Hacer alguna inteligencia que obtenga las unidades y los pesos de las descripciones
 - [ ] Crear script que corra todos los scrapers a la vez
-- [ ] Guardar en SQL
-- [ ] Ver errores de precio -> 'NaN', ' '
 - [ ] Arreglar bug medidas y unidades -> Sólo poner medidas en ciertas categorías
 
 ## Página
