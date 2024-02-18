@@ -268,6 +268,7 @@ def start_browser(headless):
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument('--log-level=1')
     chrome_options.add_argument('--blink-settings=imagesEnabled=false')
+    chrome_options.add_argument(f'--disk-cache-dir={ACTUAL_DIRECTORY}/cache')
     chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
     browser = webdriver.Chrome(service=service, options=chrome_options)
     return browser 
@@ -279,12 +280,12 @@ def start_browser(headless):
 
 # -- Implementación de Threads --
 import threading
-MAX_CONCURRENT_THREADS = 3  # Puedes ajustar este número según tus necesidades
+MAX_CONCURRENT_THREADS = 2  # Puedes ajustar este número según tus necesidades
 thread_semaphore = threading.Semaphore(MAX_CONCURRENT_THREADS)
 
 def scrape_subcategory(url, categories_names):
     with thread_semaphore:
-        browser = start_browser(False)
+        browser = start_browser(True)
         print("Categoria: ", categories_names['category'], "\nSubcategoria: ", categories_names['subcategory'])
         try:
             category_products(browser=browser, link=url, categories_names=categories_names)
